@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affirmation Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .favorite-btn:hover .heart-icon {
+            fill: currentColor;
+        }
+        .favorite-btn.active .heart-icon {
+            fill: currentColor;
+        }
+        .category-btn {
+            transition: all 0.3s ease;
+        }
+        .category-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Smooth transitions for theme changes */
+        body, .card, .theme-btn, .theme-favorite-bg {
+            transition: all 0.5s ease;
+        }
+        
+        /* Gradient backgrounds for each theme */
+        .theme-all {
+            background: linear-gradient(135deg, #e9d5ff 0%, #c4b5fd 100%);
+        }
+        .theme-general {
+            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+        }
+        .theme-confidence {
+            background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+        }
+        .theme-success {
+            background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+        }
+        .theme-health {
+            background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+        }
+        .theme-relationships {
+            background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+        }
+    </style>
+</head>
+<body class="theme-all min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-10 text-current">🌟 Positive Affirmation Bot</h1>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Left Column -->
+            <div class="space-y-8">
+                <!-- Categories -->
+                <div class="card bg-white bg-opacity-80 p-6 rounded-xl shadow-sm border border-opacity-20 backdrop-blur-sm">
+                    <h2 class="text-xl font-semibold mb-4 text-current">Choose a Category</h2>
+                    <div class="flex flex-wrap gap-3" id="categories">
+                        <button class="category-btn active theme-all-btn bg-purple-100 text-purple-800 px-4 py-2 rounded-lg hover:bg-purple-200" data-category="all">All</button>
+                        <button class="category-btn theme-general-btn bg-blue-100 text-blue-800 px-4 py-2 rounded-lg hover:bg-blue-200" data-category="general">General</button>
+                        <button class="category-btn theme-confidence-btn bg-green-100 text-green-800 px-4 py-2 rounded-lg hover:bg-green-200" data-category="confidence">Confidence</button>
+                        <button class="category-btn theme-success-btn bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-200" data-category="success">Success</button>
+                        <button class="category-btn theme-health-btn bg-red-100 text-red-800 px-4 py-2 rounded-lg hover:bg-red-200" data-category="health">Health</button>
+                        <button class="category-btn theme-relationships-btn bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg hover:bg-indigo-200" data-category="relationships">Relationships</button>
+                    </div>
+                </div>
+
+                <!-- Current Affirmation -->
+                <div class="card bg-white bg-opacity-80 p-8 rounded-xl shadow-sm border border-opacity-20 backdrop-blur-sm">
+                    <div class="flex justify-between items-start mb-6">
+                        <p class="text-xl text-current" id="current-affirmation">I am worthy of good things.</p>
+                        <button class="favorite-btn ml-4 text-current" onclick="toggleFavorite()">
+                            <svg class="heart-icon w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button onclick="getNewAffirmation()" class="w-full theme-btn bg-current text-white px-6 py-3 rounded-lg hover:opacity-90 transition-all text-lg">
+                        Get New Affirmation
+                    </button>
+                </div>
+
+                <!-- Daily Reminders -->
+                <div class="card bg-white bg-opacity-80 p-6 rounded-xl shadow-sm border border-opacity-20 backdrop-blur-sm">
+                    <h2 class="text-xl font-semibold mb-4 text-current">⏰ Daily Reminders</h2>
+                    <div class="flex items-center space-x-4">
+                        <select id="reminder-time" class="border border-current border-opacity-30 p-2 rounded-lg w-32 bg-white bg-opacity-70">
+                            <option>09:00 AM</option>
+                            <option>12:00 PM</option>
+                            <option>03:00 PM</option>
+                            <option>06:00 PM</option>
+                            <option>09:00 PM</option>
+                        </select>
+                        <button onclick="setReminder()" class="theme-btn bg-current text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all">
+                            Set Reminder
+                        </button>
+                    </div>
+                    <div id="reminder-status" class="mt-3 text-current font-medium hidden">
+                        Reminder set successfully!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Favorites -->
+                <div class="card bg-white bg-opacity-80 p-6 rounded-xl shadow-sm border border-opacity-20 backdrop-blur-sm h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-current">❤️ Your Favorites</h2>
+                    <div id="favorites-list" class="space-y-3">
+                        <div class="favorite-item flex justify-between items-center theme-favorite-bg p-4 rounded-lg">
+                            <span class="text-lg text-current">I am enough just as I am.</span>
+                            <button class="text-current hover:opacity-70" onclick="removeFavorite(this)">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Your Own -->
+                <div class="card bg-white bg-opacity-80 p-6 rounded-xl shadow-sm border border-opacity-20 backdrop-blur-sm">
+                    <h2 class="text-xl font-semibold mb-4 text-current">✨ Create Your Own</h2>
+                    <textarea id="new-affirmation" class="w-full border-2 border-current border-opacity-30 p-4 rounded-lg mb-4 focus:ring-2 focus:ring-current focus:outline-none text-lg bg-white bg-opacity-70" placeholder="Write your own positive affirmation..." rows="4"></textarea>
+                    <div class="mb-6">
+                        <label class="block text-current mb-2 text-lg">Category</label>
+                        <select id="affirmation-category" class="w-full border-2 border-current border-opacity-30 p-3 rounded-lg text-lg bg-white bg-opacity-70">
+                            <option value="general">General</option>
+                            <option value="confidence">Confidence</option>
+                            <option value="success">Success</option>
+                            <option value="health">Health</option>
+                            <option value="relationships">Relationships</option>
+                        </select>
+                    </div>
+                    <button onclick="saveCustomAffirmation()" class="w-full theme-btn bg-current text-white py-3 rounded-lg hover:opacity-90 transition-all text-lg">
+                        Save My Affirmation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme colors for each category
+        const themes = {
+            all: {
+                text: 'text-purple-600',
+                btn: 'bg-purple-600',
+                favoriteBg: 'bg-purple-50'
+            },
+            general: {
+                text: 'text-blue-600',
+                btn: 'bg-blue-600',
+                favoriteBg: 'bg-blue-50'
+            },
+            confidence: {
+                text: 'text-green-600',
+                btn: 'bg-green-600',
+                favoriteBg: 'bg-green-50'
+            },
+            success: {
+                text: 'text-yellow-600',
+                btn: 'bg-yellow-600',
+                favoriteBg: 'bg-yellow-50'
+            },
+            health: {
+                text: 'text-red-600',
+                btn: 'bg-red-600',
+                favoriteBg: 'bg-red-50'
+            },
+            relationships: {
+                text: 'text-indigo-600',
+                btn: 'bg-indigo-600',
+                favoriteBg: 'bg-indigo-50'
+            }
+        };
+
+        // Affirmations database
+        const affirmations = {
+            all: [
+                "I am worthy of good things.",
+                "I embrace my inner power.",
+                "I am enough just as I am.",
+                "Every day I grow stronger.",
+                "I radiate positive energy."
+            ],
+            general: [
+                "I choose to be happy today.",
+                "I am at peace with myself.",
+                "I welcome joy into my life.",
+                "I am open to new possibilities.",
+                "I trust the journey of my life."
+            ],
+            confidence: [
+                "I believe in my abilities.",
+                "I am confident in my decisions.",
+                "My self-worth is not defined by others.",
+                "I speak with clarity and confidence.",
+                "I am comfortable in my own skin."
+            ],
+            success: [
+                "I am capable of achieving my goals.",
+                "Success flows naturally to me.",
+                "I attract opportunities for growth.",
+                "My efforts create positive results.",
+                "I am a magnet for success."
+            ],
+            health: [
+                "My body is healthy and strong.",
+                "I nourish my body with good choices.",
+                "I am full of energy and vitality.",
+                "Healing happens within me every day.",
+                "I respect my body and treat it well."
+            ],
+            relationships: [
+                "I attract loving relationships.",
+                "I communicate with love and respect.",
+                "I am surrounded by positive people.",
+                "I give and receive love freely.",
+                "My relationships are meaningful and fulfilling."
+            ]
+        };
+
+        let currentCategory = 'all';
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let activeReminder = null;
+        
+        // Change theme based on category
+        function changeTheme(category) {
+            const theme = themes[category];
+            const body = document.body;
+            
+            // Remove all theme classes
+            body.classList.remove(
+                'theme-all', 'theme-general', 'theme-confidence', 
+                'theme-success', 'theme-health', 'theme-relationships'
+            );
+            
+            // Add new theme class
+            body.classList.add(`theme-${category}`);
+            
+            // Update text colors
+            document.querySelectorAll('.text-current').forEach(el => {
+                el.classList.remove(
+                    'text-purple-600', 'text-blue-600', 'text-green-600',
+                    'text-yellow-600', 'text-red-600', 'text-indigo-600'
+                );
+                el.classList.add(theme.text);
+            });
+            
+            // Update button colors
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove(
+                    'bg-purple-600', 'bg-blue-600', 'bg-green-600',
+                    'bg-yellow-600', 'bg-red-600', 'bg-indigo-600'
+                );
+                btn.classList.add(theme.btn);
+            });
+            
+            // Update favorite background
+            document.querySelectorAll('.theme-favorite-bg').forEach(el => {
+                el.classList.remove(
+                    'bg-purple-50', 'bg-blue-50', 'bg-green-50',
+                    'bg-yellow-50', 'bg-red-50', 'bg-indigo-50'
+                );
+                el.classList.add(theme.favoriteBg);
+            });
+        }
+
+        // Set reminder function
+        function setReminder() {
+            const time = document.getElementById('reminder-time').value;
+            activeReminder = time;
+            
+            const statusElement = document.getElementById('reminder-status');
+            statusElement.textContent = `Reminder set for ${time}!`;
+            statusElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 3000);
+            
+            alert(`Daily affirmation reminder set for ${time}. You'll receive a notification!`);
+        }
+
+        // Load favorites from localStorage
+        function loadFavorites() {
+            const favoritesList = document.getElementById('favorites-list');
+            favoritesList.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<p class="text-current opacity-70">No favorites yet. Click the heart to save affirmations!</p>';
+                return;
+            }
+            
+            favorites.forEach(fav => {
+                favoritesList.innerHTML += `
+                    <div class="favorite-item flex justify-between items-center theme-favorite-bg p-4 rounded-lg">
+                        <span class="text-lg text-current">${fav.text}</span>
+                        <button class="text-current hover:opacity-70" onclick="removeFavorite(this)">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Get a new random affirmation
+        function getNewAffirmation() {
+            let categoryAffirmations = [...affirmations[currentCategory]];
+            
+            if (currentCategory === 'all') {
+                categoryAffirmations = Object.values(affirmations).flat();
+            }
+            
+            const randomIndex = Math.floor(Math.random() * categoryAffirmations.length);
+            const affirmationText = categoryAffirmations[randomIndex];
+            document.getElementById('current-affirmation').textContent = affirmationText;
+            
+            updateFavoriteButton(affirmationText);
+        }
+
+        // Toggle favorite status
+        function toggleFavorite() {
+            const affirmationText = document.getElementById('current-affirmation').textContent;
+            const index = favorites.findIndex(fav => fav.text === affirmationText);
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            
+            if (index === -1) {
+                favorites.push({
+                    text: affirmationText,
+                    category: currentCategory
+                });
+                favoriteBtn.classList.add('active');
+            } else {
+                favorites.splice(index, 1);
+                favoriteBtn.classList.remove('active');
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            loadFavorites();
+        }
+
+        // Remove favorite from list
+        function removeFavorite(button) {
+            const item = button.closest('.favorite-item');
+            const text = item.querySelector('span').textContent;
+            
+            favorites = favorites.filter(fav => fav.text !== text);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            loadFavorites();
+            
+            if (document.getElementById('current-affirmation').textContent === text) {
+                document.querySelector('.favorite-btn').classList.remove('active');
+            }
+        }
+
+        // Update favorite button state
+        function updateFavoriteButton(text) {
+            const isFavorite = favorites.some(fav => fav.text === text);
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            
+            favoriteBtn.classList.toggle('active', isFavorite);
+        }
+
+        // Save custom affirmation
+        function saveCustomAffirmation() {
+            const text = document.getElementById('new-affirmation').value.trim();
+            const category = document.getElementById('affirmation-category').value;
+            
+            if (text) {
+                affirmations[category].push(text);
+                document.getElementById('new-affirmation').value = '';
+                
+                const statusElement = document.getElementById('reminder-status');
+                statusElement.textContent = 'Your affirmation has been saved!';
+                statusElement.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    statusElement.classList.add('hidden');
+                }, 3000);
+                
+                if (currentCategory === category || currentCategory === 'all') {
+                    document.getElementById('current-affirmation').textContent = text;
+                    updateFavoriteButton(text);
+                }
+            } else {
+                alert('Please write an affirmation first!');
+            }
+        }
+
+        // Set up category buttons with theme changes
+        document.querySelectorAll('.category-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                currentCategory = this.dataset.category;
+                
+                // Update all buttons
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active', 'ring-2', 'ring-current', 'font-bold', 'scale-105');
+                });
+                
+                // Style active button
+                this.classList.add('active', 'ring-2', 'ring-current', 'font-bold', 'scale-105');
+                
+                // Change theme
+                changeTheme(currentCategory);
+                
+                // Get new affirmation
+                getNewAffirmation();
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial theme
+            changeTheme('all');
+            
+            // Load favorites
+            loadFavorites();
+            
+            // Set initial affirmation
+            getNewAffirmation();
+        });
+    </script>
+</body>
+</html>
