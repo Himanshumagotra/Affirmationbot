@@ -25,7 +25,7 @@ A beautiful, interactive web application that provides positive affirmations to 
    ```bash
    git clone https://github.com/your-username/affirmation-bot.git
    cd affirmation-bot
-File Structure
+File Structure:                                              
 affrimation/
 app.py
 templates/login.html
