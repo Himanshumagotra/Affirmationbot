@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
@@ -8,6 +7,10 @@ VALID_ID = "12319585"
 VALID_PASSWORD = "12319585"
 
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+@app.route('/login')
 def login():
     return render_template('login.html')
 
