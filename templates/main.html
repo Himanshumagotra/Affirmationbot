@@ -281,19 +281,7 @@
         }
 
         // Get a new random affirmation
-        function getNewAffirmation() {
-            let categoryAffirmations = [...affirmations[currentCategory]];
-            
-            if (currentCategory === 'all') {
-                categoryAffirmations = Object.values(affirmations).flat();
-            }
-            
-            const randomIndex = Math.floor(Math.random() * categoryAffirmations.length);
-            const affirmationText = categoryAffirmations[randomIndex];
-            document.getElementById('current-affirmation').textContent = affirmationText;
-            
-            updateFavoriteButton(affirmationText);
-        }
+       
 
         // Toggle favorite status
         function toggleFavorite() {
@@ -363,6 +351,37 @@
                 alert('Please write an affirmation first!');
             }
         }
+
+        async function getNewAffirmation() {
+  try {
+    const response = await fetch('https://api.api-ninjas.com/v1/quotes', {
+      method: 'GET',
+      headers: {
+        'X-Api-Key': '6xOd2f0yZmT1hN9S/AaydQ==7Zuj11mbk3u9SS86' // Your API key
+      }
+    });
+
+    const data = await response.json();
+
+    // Handle response format
+    if (data && data.length > 0) {
+      const quote = data[0].quote;
+      const author = data[0].author;
+
+      // Use backticks for string interpolation
+      const formattedQuote = `"${quote}" — ${author}`;
+      document.getElementById('current-affirmation').textContent = formattedQuote;
+    } else {
+      throw new Error('No data returned');
+    }
+  } catch (error) {
+    console.error("Failed to fetch affirmation:", error);
+    document.getElementById('current-affirmation').textContent = "Couldn't fetch affirmation. Please try again.";
+  }
+}
+
+    // Load one on page load
+    window.onload = getNewAffirmation;
 
         // Set up category buttons with theme changes
         document.querySelectorAll('.category-btn').forEach(button => {
